@@ -1,7 +1,6 @@
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
 
 class ClientHandler extends Thread {
     private DataInputStream input;
@@ -17,25 +16,35 @@ class ClientHandler extends Thread {
     }
 
     public void run() {
-        Scanner scanner = new Scanner(System.in);
+    try {
+        while (true) {
+            String data = input.readUTF();
+            if (data == null) {
+                System.out.println("Received null data. Client disconnected: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+                break;
+            }
+            if (data.equalsIgnoreCase("bye")) {
+                System.out.println("Client disconnected: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+                break;
+            }
+            System.out.println("Mensagem recebida: " + data);
 
-        Thread inputThread = new Thread(() -> {
+            ThreadPoolTCPServer.broadcast("Broadcast: " + data);
+        }
+        } catch (IOException e) {
+            System.out.println("Erro durante a troca de mensagens: " + e.getMessage());
+        } finally {
             try {
-                while (true) {
-                    String data = input.readUTF();
-                    if (data.equalsIgnoreCase("Thau server :)")) {
-                        break;
-                    }
-                    System.out.println("Mensagem recebida: " + data);
-                    ThreadPoolTCPServer.broadcast("Broadcast: " + data);
+                if (input != null) {
+                    input.close();
+                }
+                if (clientSocket != null) {
+                    clientSocket.close();
+                    ThreadPoolTCPServer.removeClientOutputStream(clientSocket);
                 }
             } catch (IOException e) {
-                System.out.println("Erro durante a troca de mensagens: " + e.getMessage());
+                System.out.println("Erro ao fechar recursos: " + e.getMessage());
             }
-        });
-
-        inputThread.start();
-
-        scanner.close();
+        }
     }
 }
