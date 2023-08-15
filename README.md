@@ -1,7 +1,4 @@
-# ChatTCP
-perl
-
-# Projeto Lab-Sockets Modificado
+# ChatTCP - Projeto Lab-Sockets Modificado
 
 Este projeto é uma modificação do projeto original disponível em https://github.com/marcuswac/sd-ufpb/tree/main/labs/lab-sockets. </br>
 
