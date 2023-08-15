@@ -1,7 +1,7 @@
 import java.net.*;
+import java.io.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.io.*;
 
 public class ThreadPoolTCPServer {
     public static void main(String args[]) {
@@ -13,9 +13,15 @@ public class ThreadPoolTCPServer {
                 System.out.println("Aguardando conexao no endereco: " + InetAddress.getLocalHost() + ":" + serverPort);
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler handler = new ClientHandler(clientSocket);
-                threadPool.submit(handler);
-                System.out
-                        .println("Conexao feita com: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+                threadPool.submit(() -> {
+                    handler.run();
+                    try {
+                        clientSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                System.out.println("Conexao feita com: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
             }
             serverSocket.close();
         } catch (IOException e) {
@@ -23,4 +29,3 @@ public class ThreadPoolTCPServer {
         }
     }
 }
-
